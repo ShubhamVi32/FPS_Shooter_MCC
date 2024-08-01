@@ -19,10 +19,17 @@ public class PlayerMovement : MonoBehaviour
     public bool canJump;
     public float JumpPower;
 
+    public Transform groundCheckerPoint;
+    public LayerMask groundLayer;
+
+    public Weapon currentWeapon;
+    private Transform firePoint;
+
     // Start is called before the first frame update
     void Start()
     {
-        
+
+        firePoint = currentWeapon.FirePoint;
     }
 
     // Update is called once per frame
@@ -30,19 +37,23 @@ public class PlayerMovement : MonoBehaviour
     {
         Movement();
         CameraRotation();
+        ShootBullet();
     }
 
     // THIS WILL HANDLE PLAYERS WALK,RUN AND JUMP
     void Movement()
     {
-        var horizontalValue = transform.right * Input.GetAxis("Horizontal");
-        var verticalValue =  transform.forward* Input.GetAxis("Vertical");
 
-       
+        float ystore = finalSpeed.y;
+
+        var horizontalValue = transform.right * Input.GetAxis("Horizontal");
+        var verticalValue = transform.forward * Input.GetAxis("Vertical");
+
+
         //if (horizontalValue.magnitude == 0.0f && verticalValue.magnitude == 0.0f)
         //    return;
 
-
+        // PLAYER MOVEMENT
         finalSpeed = (horizontalValue + verticalValue) * walkSpeed;
 
         if (Input.GetKey(KeyCode.LeftShift))
@@ -50,17 +61,24 @@ public class PlayerMovement : MonoBehaviour
             finalSpeed = (horizontalValue + verticalValue) * runSpeed;
         }
 
+
+
+        finalSpeed.y = ystore;
+        //ALL TIME GRAVITY
+        finalSpeed.y += Physics.gravity.y * gravityModifier * Time.deltaTime;
+
+
+
         if (CharController.isGrounded)
         {
-            canJump = true;
-        }
-        else
-        {
-            canJump = false;
+            finalSpeed.y = Physics.gravity.y * gravityModifier * Time.deltaTime;
         }
 
+        canJump = Physics.OverlapSphere(groundCheckerPoint.position, 0.25f, groundLayer).Length > 0;
 
-        finalSpeed.y += Physics.gravity.y * gravityModifier * Time.deltaTime;
+
+        //canJump = Physics.OverlapSphere(gr)
+
 
         if (canJump && Input.GetKey(KeyCode.Space))
         {
@@ -72,7 +90,7 @@ public class PlayerMovement : MonoBehaviour
 
     }
 
-     //FOR ROTATION
+    //FOR ROTATION
     void CameraRotation()
     {
         Vector2 mouseDirection = new Vector2(Input.GetAxisRaw("Mouse X"),
@@ -84,14 +102,44 @@ public class PlayerMovement : MonoBehaviour
             mouseDirection.y = -mouseDirection.y;
         }
 
-        this.transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, 
+        this.transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x,
             transform.rotation.eulerAngles.y + mouseDirection.x,
             transform.rotation.eulerAngles.z);
 
-        cameraPoint.rotation = Quaternion.Euler(cameraPoint.rotation.eulerAngles 
+        cameraPoint.rotation = Quaternion.Euler(cameraPoint.rotation.eulerAngles
             + new Vector3(-mouseDirection.y, 0f, 0f));
 
+    }
 
 
+    void ShootBullet()
+    {
+        if(Input.GetMouseButtonDown(0) && currentWeapon.fireCounter <= 0)
+        {
+            RaycastHit hit;
+
+            if(Physics.Raycast(cameraPoint.position,cameraPoint.forward,out hit, 50f))
+            {
+                if (Vector3.Distance(cameraPoint.position, hit.point) > 20)
+                {
+                    firePoint.LookAt(hit.point);
+                }
+            }
+            else
+            {
+                firePoint.LookAt(cameraPoint.position + (cameraPoint.forward * 30f));
+            }
+            FireBullet();
+        }
+
+        void FireBullet()
+        {
+            if(currentWeapon.currentAmmo > 0)
+            {
+                currentWeapon.currentAmmo--;
+                Instantiate(currentWeapon.Bullet, firePoint.position, firePoint.rotation);
+                currentWeapon.fireCounter = currentWeapon.fireRate;
+            }
+        }
     }
 }
