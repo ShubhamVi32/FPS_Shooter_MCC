@@ -31,5 +31,6 @@ public class Weapon : MonoBehaviour
     public void ReloadAmmo()
     {
         currentAmmo = RefilAmount;
+        UiManager.instance.ShowBulletCount(currentAmmo);
     }
 }

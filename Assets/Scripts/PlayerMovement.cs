@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    public static PlayerMovement instance;
+
     public CharacterController CharController;
 
     public float walkSpeed;
@@ -25,6 +27,16 @@ public class PlayerMovement : MonoBehaviour
     public Weapon currentWeapon;
     private Transform firePoint;
 
+    public Animator Anim;
+
+    public int playerScore = 0;
+
+
+    private void Awake()
+    {
+        if (instance == null)
+            instance = this;
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -38,6 +50,14 @@ public class PlayerMovement : MonoBehaviour
         Movement();
         CameraRotation();
         ShootBullet();
+
+        if(currentWeapon != null)
+        {
+            if(Input.GetKeyDown(KeyCode.R))
+            {
+                currentWeapon.ReloadAmmo();
+            }
+        }
     }
 
     // THIS WILL HANDLE PLAYERS WALK,RUN AND JUMP
@@ -55,6 +75,17 @@ public class PlayerMovement : MonoBehaviour
 
         // PLAYER MOVEMENT
         finalSpeed = (horizontalValue + verticalValue) * walkSpeed;
+
+        //Anim.enabled = finalSpeed == Vector3.zero;
+
+        if(finalSpeed == Vector3.zero)
+        {
+            Anim.enabled = false;
+        }
+        else
+        {
+            Anim.enabled = true;
+        }
 
         if (Input.GetKey(KeyCode.LeftShift))
         {
@@ -137,6 +168,7 @@ public class PlayerMovement : MonoBehaviour
             if(currentWeapon.currentAmmo > 0)
             {
                 currentWeapon.currentAmmo--;
+                UiManager.instance.ShowBulletCount(currentWeapon.currentAmmo);
                 Instantiate(currentWeapon.Bullet, firePoint.position, firePoint.rotation);
                 currentWeapon.fireCounter = currentWeapon.fireRate;
             }

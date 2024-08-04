@@ -25,4 +25,16 @@ public class Bullet : MonoBehaviour
             Destroy(this.gameObject);
         }
     }
+
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag.Equals("Enemy"))
+        {
+            PlayerMovement.instance.playerScore += 5;
+            UiManager.instance.ShowScore(PlayerMovement.instance.playerScore);
+            Destroy(collision.gameObject);
+        }
+        Destroy(this.gameObject);
+    }
 }
