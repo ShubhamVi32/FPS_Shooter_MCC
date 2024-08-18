@@ -78,14 +78,14 @@ public class PlayerMovement : MonoBehaviour
 
         //Anim.enabled = finalSpeed == Vector3.zero;
 
-        if(finalSpeed == Vector3.zero)
-        {
-            Anim.enabled = false;
-        }
-        else
-        {
-            Anim.enabled = true;
-        }
+        //if(finalSpeed == Vector3.zero)
+        //{
+        //    Anim.enabled = false;
+        //}
+        //else
+        //{
+        //    Anim.enabled = true;
+        //}
 
         if (Input.GetKey(KeyCode.LeftShift))
         {

@@ -33,7 +33,7 @@ public class Bullet : MonoBehaviour
         {
             PlayerMovement.instance.playerScore += 5;
             UiManager.instance.ShowScore(PlayerMovement.instance.playerScore);
-            Destroy(collision.gameObject);
+            collision.gameObject.GetComponent<EnemyMovement>().HealthManage(damage);
         }
         Destroy(this.gameObject);
     }
