@@ -9,6 +9,7 @@ public class Bullet : MonoBehaviour
     public int HeadShootDamage;
     public Rigidbody rb;
     public float lifeTime;
+    public GameObject hitEffect;
     // Start is called before the first frame update
     void Start()
     {
@@ -35,6 +36,7 @@ public class Bullet : MonoBehaviour
             UiManager.instance.ShowScore(PlayerMovement.instance.playerScore);
             collision.gameObject.GetComponent<EnemyMovement>().HealthManage(damage);
         }
+        Instantiate(hitEffect, this.transform.position, Quaternion.identity);
         Destroy(this.gameObject);
     }
 }

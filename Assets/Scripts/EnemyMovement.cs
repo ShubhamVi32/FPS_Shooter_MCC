@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.UI;
 
 public class EnemyMovement : MonoBehaviour
@@ -13,9 +14,24 @@ public class EnemyMovement : MonoBehaviour
     private GameObject player;
     public float chaseTime;
 
+    public NavMeshAgent agent;
+    public float activeRange;
+    public float distanceToLose;
+    private Vector3 initialPos;
+    public GameObject EnemyBullet;
+    public bool canShoot;
+    [SerializeField] private float Firerate = 0.5f, waitbetweenShoot = 2f, TimetoShoot = 1f;
+    [SerializeField] float ShootTimeCounter;
+    [SerializeField] float firecount, ShotWaitCounter;
+    [SerializeField] Transform Firepoint;
     // Start is called before the first frame update
     void Start()
     {
+        ShootTimeCounter = TimetoShoot;
+        ShotWaitCounter = waitbetweenShoot;
+        agent = this.GetComponent<NavMeshAgent>();
+        initialPos = this.transform.position;
+
         currentHealth = healthValue;
         player = GameObject.FindGameObjectWithTag("Player");
     }
@@ -30,13 +46,52 @@ public class EnemyMovement : MonoBehaviour
     {
         if (player != null)
         {
-            if (Vector3.Distance(player.transform.position, this.transform.position) > 2)
-            {
-                this.transform.position = Vector3.MoveTowards(transform.position,
-                        player.transform.position, chaseTime * Time.deltaTime);
-            }
-           
+            
+            //if (Vector3.Distance(transform.position, player.transform.position) < distanceToLose)
+            //{
+            //    ShootTimeCounter = TimetoShoot;
+            //    ShotWaitCounter = waitbetweenShoot;
+            //}
 
+            if (Vector3.Distance(this.transform.position,player.transform.position) < activeRange)
+            {
+                agent.destination = player.transform.position;
+            }
+             if(Vector3.Distance(this.transform.position, player.transform.position) > distanceToLose)
+            {
+                agent.destination = initialPos;
+            }
+
+            //if (canShoot)
+            //{
+            //    ShootTimeCounter -= Time.deltaTime;
+            //    if (ShootTimeCounter > 0)
+            //    {
+            //        Debug.Log("shoot 1");
+            //        firecount -= Time.deltaTime;
+            //        if (firecount <= 0)
+            //        {
+            //            firecount = Firerate;
+            //            Firepoint.LookAt(player.transform.position);
+            //            Vector3 targetdir = player.transform.position - transform.position;
+            //            float angle = Vector3.SignedAngle(targetdir, transform.forward, Vector3.up);
+                        
+            //            if (Mathf.Abs(angle) < 15f)
+            //            {
+            //                Instantiate(EnemyBullet, Firepoint.position, Firepoint.rotation);
+            //            }
+            //            else
+            //            {
+            //                ShotWaitCounter = waitbetweenShoot;
+            //            }
+            //        }
+            //        //agent.destination = transform.position;
+            //    }
+            //    else
+            //    {
+            //        ShotWaitCounter = waitbetweenShoot;
+            //    }
+            //}
         }
     }
 

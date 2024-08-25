@@ -30,6 +30,11 @@ public class PlayerMovement : MonoBehaviour
     public Animator Anim;
 
     public int playerScore = 0;
+    public float Health;
+
+
+    private int CurrentWeapon;
+    public List<Weapon> Guns;
 
 
     private void Awake()
@@ -40,8 +45,10 @@ public class PlayerMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        currentWeapon = Guns[CurrentWeapon];
+        currentWeapon.gameObject.SetActive(true);
         firePoint = currentWeapon.FirePoint;
+        UiManager.instance.ShowBulletCount(currentWeapon.currentAmmo);
     }
 
     // Update is called once per frame
@@ -50,6 +57,10 @@ public class PlayerMovement : MonoBehaviour
         Movement();
         CameraRotation();
         ShootBullet();
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            SwitchGuns();
+        }
 
         if(currentWeapon != null)
         {
@@ -145,7 +156,16 @@ public class PlayerMovement : MonoBehaviour
 
     void ShootBullet()
     {
-        if(Input.GetMouseButtonDown(0) && currentWeapon.fireCounter <= 0)
+
+        if (Input.GetMouseButton(0) && currentWeapon.canAutoFire)
+        {
+            if (currentWeapon.fireCounter <= 0)
+            {
+                FireBullet();
+            }
+        }
+
+        if (Input.GetMouseButtonDown(0) && currentWeapon.fireCounter <= 0)
         {
             RaycastHit hit;
 
@@ -162,16 +182,33 @@ public class PlayerMovement : MonoBehaviour
             }
             FireBullet();
         }
+    }
 
-        void FireBullet()
+    void FireBullet()
+    {
+        if (currentWeapon.currentAmmo > 0)
         {
-            if(currentWeapon.currentAmmo > 0)
-            {
-                currentWeapon.currentAmmo--;
-                UiManager.instance.ShowBulletCount(currentWeapon.currentAmmo);
-                Instantiate(currentWeapon.Bullet, firePoint.position, firePoint.rotation);
-                currentWeapon.fireCounter = currentWeapon.fireRate;
-            }
+            currentWeapon.currentAmmo--;
+            UiManager.instance.ShowBulletCount(currentWeapon.currentAmmo);
+            Instantiate(currentWeapon.Bullet, firePoint.position, firePoint.rotation);
+            currentWeapon.fireCounter = currentWeapon.fireRate;
         }
+    }
+
+    void SwitchGuns()
+    {
+        currentWeapon.gameObject.SetActive(false);
+        CurrentWeapon++;
+
+        if (CurrentWeapon >= Guns.Count)
+        {
+            CurrentWeapon = 0;
+        }
+        currentWeapon = Guns[CurrentWeapon];
+        currentWeapon.gameObject.SetActive(true);
+        firePoint = currentWeapon.FirePoint;
+        UiManager.instance.ShowBulletCount(currentWeapon.currentAmmo);
+
+
     }
 }
